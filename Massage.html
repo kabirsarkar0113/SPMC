@@ -70,20 +70,21 @@
         }
 
         .massage-option {
+            margin: 17px 0;
+        }
+
+        .massage-option label {
             display: flex;
             align-items: center;
             gap: 12px;
-            margin: 17px 0;
+            font-size: 17px;
+            cursor: pointer;
         }
 
         .massage-option input {
             width: 19px;
             height: 19px;
             accent-color: #d5aa00;
-        }
-
-        .massage-option label {
-            font-size: 17px;
         }
 
         button {
@@ -100,6 +101,12 @@
 
         button:hover {
             background: #d5aa00;
+        }
+
+        button:focus-visible,
+        input:focus-visible {
+            outline: 3px solid #353323;
+            outline-offset: 2px;
         }
 
         .button-row {
@@ -126,6 +133,18 @@
             font-size: 25px;
             font-weight: bold;
             margin-top: 20px;
+        }
+
+        .message {
+            min-height: 1.4em;
+            margin: 10px 0 0;
+            font-size: 15px;
+            font-weight: bold;
+            color: #8a3b00;
+        }
+
+        .message.ok {
+            color: #3b6b12;
         }
 
         table {
@@ -164,6 +183,11 @@
             .button-row {
                 justify-content: center;
             }
+
+            th,
+            td {
+                font-size: 12px;
+            }
         }
     </style>
 </head>
@@ -171,7 +195,7 @@
 <body>
 
     <header>
-        🐥 Shakipio Massage Company
+        🐥 Shakipio Massage Company - by kabir in 2020
     </header>
 
     <!-- PAGE 1: HOME -->
@@ -212,44 +236,37 @@
             <div id="massageOptions">
 
                 <div class="massage-option">
-                    <input type="checkbox" value="Head Massage">
-                    <label>Head Massage</label>
+                    <label><input type="checkbox" value="Head Massage"> Head Massage</label>
                 </div>
 
                 <div class="massage-option">
-                    <input type="checkbox" value="Leg Massage">
-                    <label>Leg Massage</label>
+                    <label><input type="checkbox" value="Leg Massage"> Leg Massage</label>
                 </div>
 
                 <div class="massage-option">
-                    <input type="checkbox" value="Hand Massage">
-                    <label>Hand Massage</label>
+                    <label><input type="checkbox" value="Hand Massage"> Hand Massage</label>
                 </div>
 
                 <div class="massage-option">
-                    <input type="checkbox" value="Arm Massage">
-                    <label>Arm Massage</label>
+                    <label><input type="checkbox" value="Arm Massage"> Arm Massage</label>
                 </div>
 
                 <div class="massage-option">
-                    <input type="checkbox" value="Foot Massage">
-                    <label>Foot Massage</label>
+                    <label><input type="checkbox" value="Foot Massage"> Foot Massage</label>
                 </div>
 
                 <div class="massage-option">
-                    <input type="checkbox" value="Shoulder Massage">
-                    <label>Shoulder Massage</label>
+                    <label><input type="checkbox" value="Shoulder Massage"> Shoulder Massage</label>
                 </div>
 
                 <div class="massage-option">
-                    <input type="checkbox" value="Back Massage">
-                    <label>Back Massage</label>
+                    <label><input type="checkbox" value="Back Massage"> Back Massage</label>
                 </div>
-
 
             </div>
 
             <p id="selectionMessage">0 of 2 selected.</p>
+            <p class="message" id="selectionError" role="alert"></p>
 
             <div class="button-row">
                 <button onclick="showPage('home')">← Back</button>
@@ -271,10 +288,10 @@
 
             <p>Select the number of minutes for each selected massage.</p>
 
-            <input type="range" id="minutes" min="1" max="15" value="5" step="1">
+            <input type="range" id="minutes" min="2" max="14" value="6" step="2" aria-label="Minutes per massage">
 
             <div class="duration-display">
-                <span id="minuteValue">5</span> Minutes
+                <span id="minuteValue">6</span> Minutes
             </div>
 
             <p style="text-align:center">
@@ -286,7 +303,7 @@
                 <button onclick="calculatePrice()">Calculate Price</button>
             </div>
 
-            <div id="result"></div>
+            <div id="result" role="status"></div>
 
             <div style="text-align:center">
                 <button id="confirmButton" onclick="confirmBooking()" style="display:none">
@@ -338,8 +355,9 @@
                 <thead>
                     <tr>
                         <th>Massage</th>
-                        <th>Minutes</th>
+                        <th>Min (each)</th>
                         <th>Amount</th>
+                        <th>Date</th>
                     </tr>
                 </thead>
 
@@ -348,24 +366,24 @@
 
             <h3 id="totalAmount">Total Revenue: ₹0</h3>
 
+            <p class="message" id="historyMessage" role="status"></p>
+
             <div class="button-row">
                 <button onclick="showPage('home')">Home</button>
-                <button onclick="clearHistory()">Clear History</button>
+                <button onclick="pay()">Pay</button>
             </div>
 
         </div>
 
     </section>
 
-
-    <footer>
-        🐥 Shakipio Massage Company
-    </footer>
-
-
     <script>
 
         const RATE = 5;
+        const MIN_MINUTES = 2;
+        const MAX_MINUTES = 14;
+        const DEFAULT_MINUTES = 6;
+        const PAY_LIMIT = 100;
 
         let currentPrice = 0;
         let selectedMassages = [];
@@ -385,6 +403,27 @@
         }
 
 
+        // HELPERS
+
+        function resetPrice() {
+            currentPrice = 0;
+            document.getElementById("result").innerText = "";
+            document.getElementById("confirmButton").style.display = "none";
+        }
+
+        function getTotal() {
+            return transactions.reduce(
+                (sum, item) => sum + Number(item.amount), 0
+            );
+        }
+
+        function showMessage(id, text, ok) {
+            const el = document.getElementById(id);
+            el.innerText = text;
+            el.classList.toggle("ok", Boolean(ok));
+        }
+
+
         // PAGE NAVIGATION
 
         function showPage(pageId) {
@@ -401,6 +440,7 @@
             });
 
             if (pageId === "history") {
+                showMessage("historyMessage", "");
                 displayTransactions();
             }
         }
@@ -416,12 +456,14 @@
 
             box.addEventListener("change", function () {
 
+                showMessage("selectionError", "");
+
                 const selected = Array.from(checkboxes)
                     .filter(item => item.checked);
 
                 if (selected.length > 2) {
                     box.checked = false;
-                    alert("Maximum two massages allowed.");
+                    showMessage("selectionError", "Maximum two massages allowed.");
                 }
 
                 const count = Array.from(checkboxes)
@@ -430,9 +472,7 @@
                 document.getElementById("selectionMessage").innerText =
                     count + " of 2 selected.";
 
-                currentPrice = 0;
-                document.getElementById("result").innerText = "";
-                document.getElementById("confirmButton").style.display = "none";
+                resetPrice();
 
             });
 
@@ -448,17 +488,13 @@
                 .map(item => item.value);
 
             if (selectedMassages.length === 0) {
-                alert("Please select at least one massage.");
+                showMessage("selectionError", "Please select at least one massage.");
                 return;
             }
 
-            currentPrice = 0;
-            document.getElementById("result").innerText = "";
-            document.getElementById("confirmButton").style.display = "none";
-
+            showMessage("selectionError", "");
+            resetPrice();
             showPage("duration");
-
-            console.log("Selected massages:", selectedMassages);
         }
 
 
@@ -467,13 +503,8 @@
         const slider = document.getElementById("minutes");
 
         slider.addEventListener("input", function () {
-
             document.getElementById("minuteValue").innerText = slider.value;
-
-            currentPrice = 0;
-            document.getElementById("result").innerText = "";
-            document.getElementById("confirmButton").style.display = "none";
-
+            resetPrice();
         });
 
 
@@ -490,10 +521,6 @@
 
             document.getElementById("confirmButton").style.display =
                 "inline-block";
-
-            console.log("Duration:", minutes);
-            console.log("Price:", currentPrice);
-
         }
 
 
@@ -507,21 +534,21 @@
                 selectedMassages.length < 1 ||
                 selectedMassages.length > 2 ||
                 !Number.isInteger(minutes) ||
-                minutes < 1 ||
-                minutes > 15 ||
+                minutes < MIN_MINUTES ||
+                minutes > MAX_MINUTES ||
                 currentPrice !== minutes * RATE * selectedMassages.length
             ) {
-                alert("Please calculate your price again.");
+                resetPrice();
+                document.getElementById("result").innerText =
+                    "Please calculate your price again.";
                 return;
             }
 
             const transaction = {
-
                 massage: selectedMassages.join(" + "),
                 minutes: minutes,
                 amount: currentPrice,
                 date: new Date().toLocaleString("en-IN")
-
             };
 
             transactions.push(transaction);
@@ -534,12 +561,10 @@
             } catch (error) {
                 transactions.pop();
                 console.error("Could not save transaction:", error);
-                alert("Booking could not be saved. Please check browser storage.");
+                document.getElementById("result").innerText =
+                    "Booking could not be saved. Please check browser storage.";
                 return;
             }
-
-            console.log("NEW TRANSACTION:", transaction);
-            console.table(transactions);
 
             document.getElementById("confirmationDetails").innerText =
                 "Massage: " + transaction.massage +
@@ -549,7 +574,6 @@
             displayTransactions();
 
             showPage("confirmation");
-
         }
 
 
@@ -560,19 +584,17 @@
             checkboxes.forEach(item => item.checked = false);
 
             selectedMassages = [];
-            currentPrice = 0;
 
             document.getElementById("selectionMessage").innerText =
                 "0 of 2 selected.";
+            showMessage("selectionError", "");
 
-            slider.value = 5;
-            document.getElementById("minuteValue").innerText = "5";
+            slider.value = DEFAULT_MINUTES;
+            document.getElementById("minuteValue").innerText = DEFAULT_MINUTES;
 
-            document.getElementById("result").innerText = "";
-            document.getElementById("confirmButton").style.display = "none";
+            resetPrice();
 
             showPage("home");
-
         }
 
 
@@ -584,18 +606,15 @@
 
             list.innerHTML = "";
 
-            let total = 0;
-
             transactions.forEach(item => {
-
-                total += Number(item.amount);
 
                 const row = document.createElement("tr");
 
                 [
                     item.massage,
                     item.minutes,
-                    "₹" + item.amount
+                    "₹" + item.amount,
+                    item.date || "-"
                 ].forEach(value => {
 
                     const cell = document.createElement("td");
@@ -609,39 +628,45 @@
             });
 
             document.getElementById("totalAmount").innerText =
-                "Total Revenue: ₹" + total;
-
+                "Total Revenue: ₹" + getTotal();
         }
 
 
-        // CLEAR HISTORY
+        // PAY (clears history only when total revenue is under ₹100)
 
-        function clearHistory() {
+        function pay() {
 
-            if (!confirm("Clear all transaction history?")) {
+            const total = getTotal();
+
+            if (transactions.length === 0) {
+                showMessage("historyMessage", "Nothing to pay.");
                 return;
             }
 
-            try {
-                localStorage.removeItem("massageTransactions");
-                transactions = [];
-                displayTransactions();
-                console.log("Transaction history cleared.");
-
-            } catch (error) {
-                console.error("Could not clear history:", error);
-                alert("Unable to clear transaction history.");
+            if (total >= PAY_LIMIT) {
+                showMessage(
+                    "historyMessage",
+                    "Total is ₹" + total + ". History can only be cleared when it is under ₹" + PAY_LIMIT + "."
+                );
+                return;
             }
 
+            transactions = [];
+
+            try {
+                localStorage.removeItem("massageTransactions");
+            } catch (error) {
+                console.error("Could not clear history:", error);
+            }
+
+            displayTransactions();
+            showMessage("historyMessage", "Payment done. History cleared.", true);
         }
 
 
         // INITIALISE WEBSITE
 
         displayTransactions();
-
-        console.log("Shakipio Massage Company is ready!");
-        console.log("Rate: ₹5 per minute per massage.");
 
     </script>
 
