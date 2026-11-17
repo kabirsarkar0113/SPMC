@@ -632,7 +632,7 @@
         }
 
 
-        // PAY (clears history only when total revenue is under ₹100)
+        // PAY (clears history only when total revenue is more than ₹100)
 
         function pay() {
 
@@ -643,10 +643,10 @@
                 return;
             }
 
-            if (total >= PAY_LIMIT) {
+            if (total <= PAY_LIMIT) {
                 showMessage(
                     "historyMessage",
-                    "Total is ₹" + total + ". History can only be cleared when it is under ₹" + PAY_LIMIT + "."
+                    "Total is ₹" + total + ". History can only be cleared when it is more than ₹" + PAY_LIMIT + "."
                 );
                 return;
             }
