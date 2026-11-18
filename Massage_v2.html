@@ -328,7 +328,7 @@
 
             <p>Select the number of minutes for each selected massage.</p>
 
-            <input type="range" id="minutes" min="2" max="14" value="6" step="2" aria-label="Minutes per massage">
+            <input type="range" id="minutes" min="2" max="7" value="6" step="1" aria-label="Minutes per massage">
 
             <div class="duration-display">
                 <span id="minuteValue">6</span> Minutes
@@ -341,7 +341,7 @@
             </p>
 
             <p style="text-align:center">
-                Rate: ₹5 per minute, per massage.
+                Rate: ₹6 per minute, per massage.
             </p>
 
             <div class="button-row">
@@ -429,9 +429,9 @@
 
     <script>
 
-        const RATE = 5;
+        const RATE = 6;
         const MIN_MINUTES = 2;
-        const MAX_MINUTES = 14;
+        const MAX_MINUTES = 7;
         const DEFAULT_MINUTES = 6;
         const PAY_LIMIT = 100;
 
