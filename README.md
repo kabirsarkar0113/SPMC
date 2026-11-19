@@ -1,3 +1,8 @@
+added:
+transaction button at home page
+massage time multiplier calculation for 2 massages
+permanent payment history reciept
+and reduced limit of timer slider
 First version of massage company website:
 inludes-
 A single-page massage booking app built with plain HTML, CSS, and JavaScript, with no frameworks or dependencies.
